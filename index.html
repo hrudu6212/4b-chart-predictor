@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>4B Chart Predictor — on-device</title>
+<style>
+  :root { color-scheme: dark; --bg:#0b0d12; --panel:#121620; --line:#232a3a;
+          --text:#e8ecf6; --muted:#98a2b8; --accent:#5b8cff; --up:#22c55e;
+          --flat:#eab308; --down:#ef4444; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:radial-gradient(1200px 600px at 20% -10%, #17203a, var(--bg));
+         color:var(--text); font:16px/1.5 system-ui, Segoe UI, Roboto, sans-serif; }
+  main { max-width: 780px; margin: 0 auto; padding: 48px 20px 64px; }
+  h1 { font-size: clamp(26px, 4vw, 38px); margin: 0 0 8px; letter-spacing:-.02em; }
+  .sub { color: var(--muted); margin: 0 0 28px; }
+  .card { background: var(--panel); border:1px solid var(--line); border-radius:16px; padding:20px; }
+  .drop { border:2px dashed #33405c; border-radius:12px; padding:32px 16px; text-align:center;
+          cursor:pointer; transition:border-color .15s, background .15s; }
+  .drop:hover, .drop.over { border-color: var(--accent); background:#161d2e; }
+  .drop p { margin:6px 0; color:var(--muted); }
+  .drop strong { color:var(--text); }
+  input[type=file] { display:none; }
+  .row { display:flex; gap:12px; align-items:center; margin-top:16px; flex-wrap:wrap; }
+  button { background:var(--accent); color:#fff; border:0; border-radius:10px; padding:11px 20px;
+           font-weight:600; cursor:pointer; }
+  button:disabled { opacity:.45; cursor:not-allowed; }
+  .ghost { background:transparent; border:1px solid var(--line); color:var(--muted); }
+  #status { color:var(--muted); font-size:14px; min-height:20px; }
+  .preview { display:none; margin-top:18px; }
+  .preview img { max-width:100%; max-height:300px; border-radius:10px; border:1px solid var(--line); }
+  .results { display:none; margin-top:22px; }
+  .verdict { font-size:15px; color:var(--muted); margin-bottom:14px; }
+  .verdict b { color:var(--text); font-size:20px; text-transform:uppercase; }
+  .bar { display:grid; grid-template-columns:64px 1fr 58px; gap:10px; align-items:center; margin:9px 0; }
+  .bar .label { text-transform:uppercase; font-size:12px; letter-spacing:.06em; color:var(--muted); }
+  .track { height:10px; background:#0a0f1a; border-radius:99px; overflow:hidden; }
+  .fill { height:100%; width:0; border-radius:99px; transition:width .5s ease; }
+  .val { text-align:right; font-variant-numeric: tabular-nums; font-size:14px; }
+  footer { margin-top:26px; color:var(--muted); font-size:13px; }
+  footer a { color:#8fb0ff; }
+  .err { color:#ffb4b4; }
+</style>
+</head>
+<body>
+<main>
+  <h1>4B Chart Predictor</h1>
+  <p class="sub">ResNet18 chart-image classifier · runs entirely in your browser (ONNX Runtime Web).
+     The image never leaves your device.</p>
+
+  <div class="card">
+    <label class="drop" id="drop" for="file">
+      <p><strong>Drop a chart image</strong> or click to choose</p>
+      <p>PNG · JPG · WEBP</p>
+      <input id="file" type="file" accept="image/png,image/jpeg,image/webp" />
+    </label>
+
+    <div class="preview" id="preview"><img id="previewImg" alt="chart preview" /></div>
+
+    <div class="row">
+      <button id="predict" disabled>Predict</button>
+      <button id="clear" class="ghost" disabled>Clear</button>
+      <span id="status">Loading model…</span>
+    </div>
+
+    <div class="results" id="results">
+      <div class="verdict" id="verdict"></div>
+      <div id="bars"></div>
+    </div>
+  </div>
+
+  <footer>
+    Statistical chart-image estimate only — not financial advice or a guarantee.
+    Model card and source: <a id="repo" href="#">GitHub</a>.
+  </footer>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
